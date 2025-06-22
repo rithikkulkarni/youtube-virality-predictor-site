@@ -212,7 +212,7 @@
 					const formData = new FormData(form);
 
 					try {
-						const res = await fetch('https://youtube-predictor-web-service.onrender.com/', {
+						const res = await fetch('https://youtube-predictor-web-service.onrender.com/extract_and_predict', {
 							method: 'POST',
 							body: formData
 						});
