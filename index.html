@@ -221,9 +221,10 @@
 							throw new Error('API error: ' + res.status);
 						}
 
-						// If your API returns plain text:
-						const text = await res.text();
-						responseDiv.textContent = text;
+						const data = await res.json();
+						const label = data.prediction === 0 ? "Viral" : "Not Viral";
+						const prob = (data.probability * 100).toFixed(1) + "%";
+						responseDiv.innerHTML = `<span style="font-size:1.2em;font-weight:bold;">${label}</span><br>Virality Potential: ${prob}`;
 					} catch (err) {
 						responseDiv.textContent = "Error: " + err.message;
 					}
