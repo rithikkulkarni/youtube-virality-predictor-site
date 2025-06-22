@@ -236,7 +236,7 @@
 							}
 						}
 
-						const label = data.prediction === 0 ? "Viral" : "Not Viral";
+						const label = data.prediction === 1 ? "Viral" : "Not Viral";
 						const prob = (data.probability * 100).toFixed(1) + "%";
 						responseDiv.innerHTML = `<span style="font-size:1.2em;font-weight:bold;">${label}</span><br>Virality Potential: ${prob}`;
 					} catch (err) {
