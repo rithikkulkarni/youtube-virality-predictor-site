@@ -3,7 +3,6 @@
 
 ### 🌐 Static Website (`youtube-virality-predictor-site`) – `README.md`
 
-markdown
 # YouTube Virality Predictor – Static Frontend
 
 This is the frontend for the YouTube Virality Predictor project. Users can upload a thumbnail and provide metadata (title, description, tags) to get a prediction from the backend API about their video's viral potential.
