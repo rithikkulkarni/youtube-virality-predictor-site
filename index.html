@@ -43,9 +43,11 @@
 				<!-- Banner -->
 					<section id="banner">
 						<div class="inner">
-							<div class="logo"><span class="icon fa-gem"></span></div>
-							<h2>YouTube Metadata Classifier</h2>
-							<p>Upload your pre-publication YouTube video metadata and leverage this free, content-tailored model to judge your video</p>
+							<div class="logo" style="display: flex; justify-content: center; align-items: center;">
+								<span class="icon brands fa-youtube" style="font-size: 4.5em; display: inline-block; text-align: center;"></span>
+							</div>
+							<h2>Pre-Publish YouTube Video Classifier</h2>
+							<p>Upload your pre-publication YouTube video metadata and leverage this free, content-tailored model to judge your video!</p>
 						</div>
 					</section>
 
@@ -55,7 +57,9 @@
 						<!-- One -->
 							<section id="one" class="wrapper spotlight style1">
 								<div class="inner">
-									<a href="#" class="image"><img src="images/pic01.jpg" alt="" /></a>
+									<a href="#" class="image">
+										<img src="images/mlicon.png" alt="" style="filter: invert(1) brightness(2);" />
+									</a>
 									<div class="content">
 										<h2 class="major">Want to understand the research behind this model?</h2>
 										<p>This model is built on state-of-the-art techniques in image & natural language processing combined with a classic machine learning pipeline. By analyzing vast amounts of video metadata, it learns to predict the potential virality of new videos using only pre-publication data that have scientifically-backed influence on users' clickthrough rate.</p>
@@ -67,7 +71,7 @@
 						<!-- Two -->
 							<section id="two" class="wrapper alt spotlight style2">
 								<div class="inner">
-									<a href="#" class="image"><img src="images/pic02.jpg" alt="" /></a>
+									<!-- <a href="#" class="image"><img src="images/disclaimerimage.png" alt="" /></a> -->
 									<div class="content">
 										<h2 class="major">Disclaimer</h2>
 										<p> This prediction is only an estimate and may not perfectly match actual video performance. The model is tuned to prioritize catching as many potentially viral videos as possible—so while it may produce some false positives, it’s designed to minimize missed opportunities for promoting high-potential content.</p>
@@ -147,7 +151,7 @@
 									</div>
 									<div class="field">
 										<label for="tags">Tags (comma-separated)</label>
-										<input type="text" name="tags" id="tags" placeholder="Tag1, tag2, tag3" />
+										<input type="text" name="tags" id="tags" placeholder="Tag1, tag2, tag3..." />
 									</div>
 								</div>
 								<ul class="actions">
