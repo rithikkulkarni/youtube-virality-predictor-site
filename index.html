@@ -44,7 +44,7 @@
                     </a>
                     <div class="content">
                         <h2 class="major">Want to understand the research behind this model?</h2>
-                        <p>Trained on over 15,000 YouTube videos, this model is built on state-of-the-art techniques in image & natural language processing combined with a classic machine learning pipeline. By analyzing vast amounts of video metadata, it learns to predict the potential virality of new videos using only pre-publication data that have been scientifically proven to influence users' clickthrough rate.</p>
+                        <p>Trained on over 15,000 YouTube videos, this model is built on state-of-the-art techniques in image & natural language processing combined with a classic machine learning pipeline. By analyzing vast amounts of video metadata, it learns to predict the potential performance of new videos using only pre-publication data that have been scientifically proven to influence audience engagement.</p>
                         <a href="research.html" class="special">Learn more</a>
                     </div>
                 </div>
@@ -55,7 +55,7 @@
                 <div class="inner">
                     <div class="content">
                         <h2 class="major">Disclaimer</h2>
-                        <p>This prediction is only an estimate and may not perfectly match actual video performance. The model is tuned to prioritize catching as many potentially viral videos as possible—so while it may produce some false positives, it’s designed to minimize missed opportunities for promoting high-potential content.</p>
+                        <p>This prediction is only an estimate and may not match actual video performance. This tool is meant as a guideline to minimize missed opportunities for promoting high-potential content, but it may not catch all potential hits.</p>
                     </div>
                 </div>
             </section>
@@ -66,7 +66,7 @@
         <section id="footer">
             <div class="inner">
                 <h2 class="major">Judge your video</h2>
-                <p>Upload your thumbnail image and paste your video title & tags below. Click Predict to see your video's potential to go viral.</p>
+                <p>Upload your thumbnail image and paste your video title & tags below. Click Predict to see your video's potential for high performance</p>
                 <form method="post" enctype="multipart/form-data">
                     <div class="fields">
                         <div class="field">
@@ -145,7 +145,7 @@
             const data = await res.json();
             const label = data.prediction === 1 ? "Viral" : "Not Viral";
             const prob  = (data.probability * 100).toFixed(1) + "%";
-            responseDiv.innerHTML = `<strong>${label}</strong><br>Virality Potential: ${prob}`;
+            responseDiv.innerHTML = `Video Potential: ${prob}`;
         } catch (err) {
             responseDiv.textContent = "Error: " + err.message;
         }
