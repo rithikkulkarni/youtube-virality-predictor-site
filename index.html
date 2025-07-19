@@ -1,9 +1,4 @@
 <!DOCTYPE HTML>
-<!--
-    Solid State by HTML5 UP
-    html5up.net | @ajlkn
-    Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
 <html>
 <head>
     <title>🎞️ YouTube Classifier</title>
@@ -13,10 +8,7 @@
     <noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
 </head>
 <body class="is-preload">
-
-    <!-- Page Wrapper -->
     <div id="page-wrapper">
-
         <!-- Header -->
         <header id="header" class="alt">
             <h1><a href="index.html">Pre-Publish YT Potential Calculator</a></h1>
@@ -25,11 +17,11 @@
         <!-- Banner -->
         <section id="banner">
             <div class="inner">
-                <div class="logo" style="display: flex; justify-content: center; align-items: center;">
-                    <span class="icon brands fa-youtube" style="font-size: 4.5em; display: inline-block; text-align: center;"></span>
+                <div class="logo" style="display:flex;justify-content:center;align-items:center;">
+                    <span class="icon brands fa-youtube" style="font-size:4.5em;"></span>
                 </div>
                 <h2>Pre-Publish YT Potential Calculator</h2>
-                <p style="text-align: center;">Upload your pre-publication YouTube video metadata and leverage this free, content-tailored model to judge your video!</p>
+                <p style="text-align:center;">Upload your pre‑publication YouTube video metadata and leverage this free, content‑tailored model to judge your video!</p>
             </div>
         </section>
 
@@ -62,48 +54,26 @@
 
         </section>
 
-        <!-- Footer -->
+        <!-- Footer / Form -->
         <section id="footer">
             <div class="inner">
                 <h2 class="major">Judge your video</h2>
-                <p>Upload your thumbnail image and paste your video title & tags below. Click Predict to see your video's potential for high performance</p>
-                <form method="post" enctype="multipart/form-data">
+                <p>Upload your thumbnail image and paste your video metadata below. Click Predict to see your video's potential—and get tailored suggestions.</p>
+                <form method="post" enctype="multipart/form-data" id="predict-form">
                     <div class="fields">
-                        <div class="field">
-                            <label for="thumbnail">Thumbnail Image</label>
-                            <input type="file" name="thumbnail" id="thumbnail" accept="image/*" />
-                        </div>
-                        <div class="field">
-                            <label for="title">Title</label>
-                            <input type="text" name="title" id="title" placeholder="Title..." />
-                        </div>
-                        <div class="field">
-                            <label for="tags">Tags (comma-separated)</label>
-                            <input type="text" name="tags" id="tags" placeholder="Tag1, tag2, tag3..." />
-                        </div>
-                        <div class="field">
-                            <label for="subscriber-count">Subscriber Count</label>
-                            <input
-                                type="number"
-                                name="subscriber-count"
-                                id="subscriber-count"
-                                placeholder="Subscriber Count..."
-                                style="color: #111; background: #fff;"
-                            />
-                        </div>
+                        <div class="field"><label for="thumbnail">Thumbnail Image</label><input type="file" name="thumbnail" id="thumbnail" accept="image/*" required /></div>
+                        <div class="field"><label for="title">Title</label><input type="text" name="title" id="title" placeholder="Title..." required /></div>
+                        <div class="field"><label for="tags">Tags (comma‑separated)</label><input type="text" name="tags" id="tags" placeholder="tag1, tag2, tag3" required /></div>
+                        <div class="field"><label for="topic">Video Topic</label><input type="text" name="topic" id="topic" placeholder="e.g. Personal Finance, Clash Royale" required /></div>
+                        <div class="field"><label for="subscriber-count">Subscriber Count</label><input type="number" name="subscriber-count" id="subscriber-count" placeholder="Subscriber Count..." min="0" required /></div>
                     </div>
-                    <ul class="actions">
-                        <li><input type="submit" value="Predict" /></li>
-                    </ul>
+                    <ul class="actions"><li><input type="submit" value="Predict" /></li></ul>
                 </form>
-                <div id="api-response" style="margin-top:1em; font-weight:bold;"></div>
-
-                <ul class="copyright">
-                    <li>&copy; Rithik Kulkarni. All rights reserved.</li>
-                </ul>
+                <div id="api-response" style="margin-top:1em;font-weight:bold;"></div>
+                <div id="llm-feedback" style="margin-top:1em;"></div>
+                <ul class="copyright"><li>© Rithik Kulkarni. All rights reserved.</li></ul>
             </div>
         </section>
-
     </div>
 
     <!-- Scripts -->
@@ -113,44 +83,79 @@
     <script src="assets/js/breakpoints.min.js"></script>
     <script src="assets/js/util.js"></script>
     <script src="assets/js/main.js"></script>
+
     <script>
-    document.querySelector('#footer form').addEventListener('submit', async function(e) {
+    // ====== CONFIG ======
+    const GEMINI_API_KEY = "YOUR_GEMINI_API_KEY"; // replace securely in production
+    const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+
+    // ====== Helper: map subscriber count to model group ======
+    function getGroup(subs){
+        if (subs <= 1_000)      return 'group1';
+        if (subs <= 10_000)     return 'group2';
+        if (subs <= 50_000)     return 'group3';
+        if (subs <= 250_000)    return 'group4';
+        if (subs <= 1_000_000)  return 'group5';
+        return 'group6';
+    }
+
+    // ====== Prompt builder (matches yt_growth_prompt) ======
+    function buildPrompt({title, tags, topic, subs, prob}){
+        return `You are a seasoned YouTube growth strategist.\n\n` +
+               `Here is a prospective video a creator is about to publish.    \n` +
+               `• Predicted probability of performing in the top\u202F25%: ${prob}  \n` +
+               `• Channel subscriber count: ${subs}  \n` +
+               `• Video title: "${title}"  \n` +
+               `• Tags: ${tags}  \n` +
+               `• Topic: ${topic}  \n\n` +
+               `First, briefly say whether the probability should encourage them to publish\u202Das‑is (high), tweak (medium), or rethink (low). Do not mention the actual probability percentage. Instead, say how the probability is high, medium, or low based on a large collection of video data. Additionally, the threshold for a "good" probability is anything above 0.35. Anywhere from 0.2‑0.35 is medium, and anything lower than 0.2 is low.  \n\n` +
+               `Then give 3–5 concise, actionable suggestions to improve the thumbnail, title wording, or tags.  \n\n` +
+               `If a suggestion refers to the thumbnail, prefix it with “Thumbnail:”; if to the title, prefix with “Title:”; if to tags, prefix with “Tags:”.  \n\n` +
+               `Keep the total answer under\u202F150\u202Fwords.`;
+    }
+
+    // ====== Call Gemini and return feedback string ======
+    async function fetchGeminiFeedback(prompt){
+        const body = {contents:[{parts:[{text:prompt}]}]};
+        const res  = await fetch(GEMINI_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+        if(!res.ok) throw new Error('Gemini API error '+res.status);
+        const json = await res.json();
+        return json.candidates?.[0]?.content?.parts?.[0]?.text || 'No feedback generated.';
+    }
+
+    // ====== Main form handler ======
+    document.getElementById('predict-form').addEventListener('submit', async (e)=>{
         e.preventDefault();
-        const responseDiv = document.getElementById('api-response');
-        responseDiv.textContent = "Predicting...";
+        const respDiv = document.getElementById('api-response');
+        const llmDiv  = document.getElementById('llm-feedback');
+        respDiv.textContent = 'Predicting...';
+        llmDiv.textContent  = '';
 
-        // Build FormData
-        const form = e.target;
-        const formData = new FormData(form);
+        const formData = new FormData(e.target);
+        const title = document.getElementById('title').value.trim();
+        const tags  = document.getElementById('tags').value.trim();
+        const topic = document.getElementById('topic').value.trim();
+        const subs  = parseInt(document.getElementById('subscriber-count').value,10)||0;
+        const group = getGroup(subs);
 
-        // 1) Determine subscriber group
-        const subs = parseInt(document.getElementById('subscriber-count').value, 10) || 0;
-        let group;
-        if      (subs <= 1_000)      group = 'group1';
-        else if (subs <= 10_000)     group = 'group2';
-        else if (subs <= 50_000)     group = 'group3';
-        else if (subs <= 250_000)    group = 'group4';
-        else if (subs <= 1_000_000)  group = 'group5';
-        else                         group = 'group6';
+        try{
+            // 1) ML prediction
+            const mlRes = await fetch(`https://youtube-predictor-web-service.onrender.com/predict/${group}`,{method:'POST',body:formData});
+            if(!mlRes.ok) throw new Error('Model API error '+mlRes.status);
+            const mlData = await mlRes.json();
+            const probDecimal = mlData.probability.toFixed(2); // 0.xx
+            respDiv.innerHTML = `Predicted viral potential: <strong>${(probDecimal*100).toFixed(1)}%</strong>`;
 
-        // 2) Call the matching endpoint
-        const url = `https://youtube-predictor-web-service.onrender.com/predict/${group}`;
-        try {
-            const res = await fetch(url, {
-                method: 'POST',
-                body: formData
-            });
-            if (!res.ok) throw new Error('API error: ' + res.status);
-
-            const data = await res.json();
-            const label = data.prediction === 1 ? "Viral" : "Not Viral";
-            const prob  = (data.probability * 100).toFixed(1) + "%";
-            responseDiv.innerHTML = `Video Potential: ${prob}`;
-        } catch (err) {
-            responseDiv.textContent = "Error: " + err.message;
+            // 2) Gemini feedback
+            llmDiv.textContent = 'Generating advice…';
+            const prompt = buildPrompt({title,tags,topic,subs,prob:probDecimal});
+            const feedback = await fetchGeminiFeedback(prompt);
+            llmDiv.innerHTML = `<p><em>AI Coach:</em></p><p>${feedback.replace(/\n/g,'<br>')}</p>`;
+        }catch(err){
+            respDiv.textContent = 'Error: '+err.message;
+            llmDiv.textContent  = '';
         }
     });
     </script>
-
 </body>
 </html>
